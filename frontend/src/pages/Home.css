@@ -1,0 +1,154 @@
+/* Estilo general */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #f3f8fc; /* Fondo suave */
+  color: #333;
+  box-sizing: border-box;
+}
+
+/* Contenedor principal */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+  width: 100%;
+  background-color: #128c7e; /* Color principal */
+  padding: 10px 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navbar ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  justify-content: center;
+}
+
+.navbar li {
+  margin: 0 15px;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.navbar a:hover {
+  color: #d4f3ef; /* Efecto hover */
+}
+
+/* Contenido principal */
+.home-content {
+  text-align: center;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  max-width: 800px;
+  width: 100%;
+  margin: 20px auto;
+}
+
+.home-content h1 {
+  font-size: 36px;
+  color: #128c7e; /* Color principal */
+  margin-bottom: 20px;
+}
+
+.home-content p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* Información del sistema de recompensas */
+.reward-system-info {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reward-system-info h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.reward-system-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.reward-system-info li {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 10px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.reward-system-info li:before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #128c7e;
+  font-size: 20px;
+}
+
+/* Botón de cerrar sesión */
+.logout-button {
+  background: linear-gradient(to right, #25d366, #128c7e);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.logout-button:hover {
+  background: linear-gradient(to right, #128c7e, #25d366);
+  transform: scale(1.05);
+}
+
+.logout-button:active {
+  transform: scale(0.95);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar ul {
+    flex-direction: column;
+  }
+
+  .navbar li {
+    margin: 10px 0;
+  }
+
+  .home-content {
+    padding: 20px;
+  }
+
+  .reward-system-info {
+    padding: 15px;
+  }
+}

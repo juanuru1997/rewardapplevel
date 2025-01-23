@@ -1,0 +1,60 @@
+
+.notification {
+    position: fixed;
+    top: 20px; 
+    right: 20px; 
+    background-color: white;
+    color: #333;
+    padding: 10px 20px; 
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px; 
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    font-size: 14px; 
+    z-index: 1000;
+    animation: slide-up 0.5s ease-in-out;
+    border-left: 6px solid #28a745; 
+    max-width: 300px; 
+    min-width: 250px; 
+  }
+  
+  
+  .notification.success {
+    border-left-color: #28a745; 
+  }
+  
+  .notification.error {
+    border-left-color: #dc3545; 
+  }
+  
+  .emoji {
+    font-size: 18px; 
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 10px; 
+    cursor: pointer;
+    margin-left: 10px;
+    font-weight: bold;
+    transition: color 0.3s;
+  }
+  
+  .close-btn:hover {
+    color: #dc3545; 
+  }
+  
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  

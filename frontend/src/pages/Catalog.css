@@ -1,0 +1,170 @@
+/* Contenedor principal del catálogo */
+.catalog-container {
+    width: 100%;
+    max-width: 1400px; /* Ancho máximo para centrar contenido */
+    margin: 0 auto; /* Centrar el catálogo horizontalmente */
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+/* Sección de categorías */
+.category-section {
+    margin-bottom: 40px;
+    border-left: 6px solid #ff9800;
+    padding-left: 20px;
+}
+
+/* Título de las categorías */
+.category-section h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    position: relative;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: color 0.4s ease, text-shadow 0.4s ease;
+}
+
+/* Línea decorativa debajo del título */
+.category-section h2::after {
+    content: "";
+    position: absolute;
+    width: 30px;
+    height: 3px;
+    background-color: #ff9800;
+    bottom: -6px;
+    left: 0;
+    border-radius: 5px;
+    animation: pulsar 1s infinite alternate;
+}
+
+/* Efecto hover en el título */
+.category-section h2:hover {
+    color: #ff9800;
+    text-shadow: 0 4px 8px rgba(255, 152, 0, 0.5);
+}
+
+/* Contenedor del carrusel */
+.carousel-container {
+    display: flex;
+    justify-content: center; /* Centrar el carrusel */
+    align-items: center;
+    overflow: hidden;
+    padding: 10px 0;
+}
+
+.carousel {
+    display: flex;
+    gap: 20px; /* Espacio entre tarjetas */
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Estilos de las tarjetas */
+.reward-card {
+    width: 280px; /* Ancho fijo para que las tarjetas sean uniformes */
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    padding: 20px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* Imagen de la tarjeta */
+.reward-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    transition: transform 0.6s ease;
+}
+
+/* Efecto hover en tarjetas */
+.reward-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(145deg, #ffffff, #f1f1f1);
+}
+
+.reward-card:hover img {
+    transform: scale(1.1);
+    filter: brightness(0.95);
+}
+
+/* Título de la tarjeta */
+.reward-card h3 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Descripción de la tarjeta */
+.reward-card p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* Botón de canje */
+.redeem-button {
+    padding: 10px 20px;
+    background-color: #25d366;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.redeem-button:hover {
+    background-color: #128c7e;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
+}
+
+/* Puntos de navegación */
+.dots {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.dots span {
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    background-color: #ccc;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.dots .active {
+    background-color: #25d366;
+}
+
+.dots span:hover {
+    background-color: #128c7e;
+    transform: scale(1.2);
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .carousel {
+        flex-wrap: wrap; /* Permitir que las tarjetas se ajusten en varias filas */
+        justify-content: center;
+    }
+
+    .reward-card {
+        width: 90%; /* Tarjetas más grandes en pantallas pequeñas */
+    }
+}

@@ -1,0 +1,134 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.notification-buttons {
+  margin: 20px;
+}
+
+.notification-buttons button {
+  padding: 10px 20px;
+  margin: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.notification-buttons button:hover {
+  background-color: #0056b3;
+}
+
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  max-width: 350px;
+  width: 100%;
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  animation: slideIn 0.5s ease-out forwards; 
+  z-index: 9999;
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+.notification.success {
+  background-color: #28a745; 
+  color: white;
+}
+
+.notification.error {
+  background-color: #dc3545; 
+  color: white;
+}
+
+.notification.info {
+  background-color: #17a2b8; 
+  color: white;
+}
+
+.notification.warning {
+  background-color: #ffc107; 
+  color: black;
+}
+
+
+.emoji {
+  font-size: 24px;
+  margin-right: 10px;
+}
+
+
+.message {
+  flex-grow: 1;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: white;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #f1f1f1;
+}
