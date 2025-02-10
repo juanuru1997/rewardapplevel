@@ -1,7 +1,7 @@
 const express = require("express");
 const { OAuth2Client } = require("google-auth-library");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User"); // Modelo de usuario
+const User = require("../models/user"); // Modelo de usuario
 const { jsonResponse } = require("../lib/jsonResponse");
 
 const JWT_SECRET = process.env.JWT_SECRET || "mi_clave_secreta";
