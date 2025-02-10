@@ -1,50 +1,131 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config(); // Cargar variables de entorno
-const { connectDB } = require("./db"); // Importar la conexión a la base de datos
-const googleAuthRoute = require("./routes/googleAuth");
-const userRoute = require("./routes/user"); // Ruta para manejar usuarios
+const { OAuth2Client } = require("google-auth-library");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const { connectDB } = require("./db");  
+const User = require("./models/user");
+const userRoutes = require("./routes/userRoutes"); // 🔹 Importar userRoutes
 
-const app = express();
-const port = process.env.PORT || 5000;
-
-// Conectar a la base de datos
+// 🔹 Conectar a MongoDB antes de iniciar el servidor
 connectDB();
 
-// Middlewares básicos
-app.use(cors());
-app.use(express.json()); // Habilitar JSON para solicitudes y respuestas
+const app = express();
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const JWT_SECRET = process.env.JWT_SECRET || "secreto";
 
-// Importar otras rutas
-const signupRoute = require("./routes/signup");
-const loginRoute = require("./routes/login");
-const rewardRoute = require("./routes/reward");
-const refreshTokenRoute = require("./routes/refreshToken");
-const signoutRoute = require("./routes/signout");
+// 🔹 Habilitar CORS
+app.use(cors({
+    origin: "http://localhost:3000",
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
+    credentials: true
+}));
 
-// Configurar rutas en el servidor
-app.use("/api/auth", googleAuthRoute); // Autenticación con Google
-app.use("/api/signup", signupRoute);
-app.use("/api/login", loginRoute);
-app.use("/api/user", userRoute); // Configuración para manejar usuarios
-app.use("/api/reward", rewardRoute);
-app.use("/api/refresh-token", refreshTokenRoute);
-app.use("/api/signout", signoutRoute);
+// 🔹 Middleware para procesar JSON
+app.use(express.json());
 
-// Endpoint básico para verificar que el servidor funciona
-app.get("/", (req, res) => {
-  res.send("Servidor funcionando correctamente.");
+// 🔹 Usar las rutas de usuario
+app.use("/api/user", userRoutes); // 🔹 Agregar el prefijo '/api/user'
+
+// 🔹 Verificar que CLIENT_ID está definido
+if (!CLIENT_ID) {
+    console.error("❌ ERROR: GOOGLE_CLIENT_ID no está definido en .env");
+    process.exit(1);
+}
+
+const client = new OAuth2Client(CLIENT_ID);
+
+// 🔹 Función para verificar el token con Google
+async function verifyGoogleToken(token) {
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: [CLIENT_ID],
+        });
+        return ticket.getPayload();
+    } catch (error) {
+        console.error("❌ Error al verificar token de Google:", error.message);
+        return null;
+    }
+}
+
+// 🔹 Ruta para autenticación con Google
+app.post("/auth/google-auth", async (req, res) => {
+    try {
+        console.log("📌 Solicitud recibida en /auth/google-auth");
+        console.log("🔹 Cuerpo de la petición:", req.body);
+
+        const { credential } = req.body;
+
+        if (!credential) {
+            console.error("❌ No se recibió un token en la solicitud.");
+            return res.status(400).json({ message: "Token de Google requerido" });
+        }
+
+        console.log("🔹 Token recibido:", credential);
+
+        const payload = await verifyGoogleToken(credential);
+
+        if (!payload) {
+            console.error("❌ Token inválido o expirado.");
+            return res.status(401).json({ message: "Token inválido o expirado" });
+        }
+
+        console.log("✅ Token verificado correctamente:", payload);
+
+        const { email, name, picture, email_verified } = payload;
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            console.log("🔹 Usuario no encontrado, creando nuevo usuario...");
+            user = new User({
+                name,
+                email,
+                email_verified,
+                picture,
+            });
+            await user.save();
+            console.log("✅ Usuario creado con éxito:", user);
+        } else {
+            console.log("🔹 Usuario ya existente, actualizando datos...");
+            user.name = name;
+            user.picture = picture;
+            if (!user.email_verified && email_verified) {
+                user.email_verified = true;
+            }
+            await user.save();
+            console.log("✅ Usuario actualizado:", user);
+        }
+
+        const token = jwt.sign(
+            { id: user._id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        console.log("✅ Token JWT generado:", token);
+
+        return res.status(200).json({
+            message: "✅ Inicio de sesión exitoso",
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                picture: user.picture,
+                email_verified: user.email_verified,
+            },
+        });
+    } catch (error) {
+        console.error("❌ Error en Google Login:", error);
+        return res.status(500).json({ message: "Error interno del servidor" });
+    }
 });
 
-// Endpoint de prueba para verificar conexión a MongoDB
-app.get("/health-check", (req, res) => {
-  res.status(200).json({
-    message: "La API está funcionando correctamente.",
-    dbStatus: "Conexión establecida con MongoDB",
-  });
-});
-
-// Iniciar el servidor
-app.listen(port, () => {
-  console.log(`Servidor corriendo en el puerto: ${port}`);
+// 🔹 Iniciar el servidor en el puerto 5000
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
 });

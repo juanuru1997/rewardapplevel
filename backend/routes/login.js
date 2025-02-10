@@ -1,10 +1,12 @@
 const express = require("express");
-const bcrypt = require("bcryptjs");
+const { OAuth2Client } = require("google-auth-library");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User"); // Modelo de usuario
 const { jsonResponse } = require("../lib/jsonResponse");
 
-const JWT_SECRET = process.env.JWT_SECRET || "mi_clave_secreta"; // Cambia esto en producción
+const JWT_SECRET = process.env.JWT_SECRET || "mi_clave_secreta";
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const client = new OAuth2Client(CLIENT_ID);
 
 const loginRoute = () => {
   const router = express.Router();
