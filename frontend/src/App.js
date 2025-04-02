@@ -10,6 +10,13 @@ import Inicio from "./pages/Inicio";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// 🔹 Obtener el CLIENT_ID desde .env
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
+if (!GOOGLE_CLIENT_ID) {
+  console.error("❌ ERROR: REACT_APP_GOOGLE_CLIENT_ID no está definido en .env. Verifica tu configuración.");
+}
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -20,8 +27,8 @@ function App() {
   }, []);
 
   return (
-    // Envolver la aplicación completa dentro de GoogleOAuthProvider
-    <GoogleOAuthProvider clientId="899704440373-gao7r5re7dau2n1gf5nduia0of1328s3.apps.googleusercontent.com">
+    // 🔹 Usar GOOGLE_CLIENT_ID desde .env
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Router>
         {/* Pasamos `isAuthenticated` y `setIsAuthenticated` al Header */}
         <Header isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />

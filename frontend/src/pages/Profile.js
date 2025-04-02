@@ -3,38 +3,46 @@ import axios from "axios";
 import "./Profile.css";
 
 function Profile() {
-  debugger;
-  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("user")));
+  const storedUser = sessionStorage.getItem("user") || localStorage.getItem("user");
+  const [user, setUser] = useState(storedUser ? JSON.parse(storedUser) : null);
   const [error, setError] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    points: 0,
-    profilePic: null,
-  });
-
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Cargar datos del usuario
+  const [formData, setFormData] = useState({
+    name: "",
+    nickname: "",
+    email: "",
+    points: 0,
+    picture: "",
+  });
+
+  const getToken = () => sessionStorage.getItem("token") || localStorage.getItem("token");
+
   const fetchUserData = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("Token no encontrado.");
+      const token = getToken();
+      if (!token) {
+        setError("⚠️ Debes iniciar sesión nuevamente.");
+        return;
+      }
 
       const response = await axios.get("http://localhost:5000/api/user/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setUser(response.data);
-      setFormData({
-        name: response.data.name || "",
-        email: response.data.email || "",
-        points: response.data.points || 0,
-        profilePic: response.data.profilePic || null,
-      });
+      if (response.data) {
+        setUser(response.data);
+        sessionStorage.setItem("user", JSON.stringify(response.data));
+        setFormData({
+          name: response.data.name || "",
+          nickname: response.data.nickname || "",
+          email: response.data.email || "",
+          points: response.data.points || 0,
+          picture: response.data.picture || "",
+        });
+      }
     } catch (err) {
-      console.error("Error al cargar los datos del usuario:", err);
-      setError("Error al cargar los datos del usuario.");
+      setError("⚠️ Error al cargar los datos del usuario.");
     }
   };
 
@@ -42,59 +50,38 @@ function Profile() {
     fetchUserData();
   }, []);
 
-  // Manejar cambios en el formulario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Manejar cambios en la foto de perfil
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prevData) => ({ ...prevData, profilePic: reader.result }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Actualizar datos del usuario
   const handleUpdateProfile = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = getToken();
+      if (!token) {
+        setError("⚠️ No estás autenticado. Inicia sesión nuevamente.");
+        return;
+      }
+
+      if (!formData.email) {
+        setError("⚠️ Error: El correo electrónico es obligatorio.");
+        return;
+      }
+
       const response = await axios.put(
-        "http://localhost:5000/api/user/profile",
+        "http://localhost:5000/api/user/update-profile",
         {
-          name: formData.name,
           email: formData.email,
+          nickname: formData.nickname,
           points: formData.points,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setSuccessMessage(response.data.message);
-      fetchUserData(); // Recargar datos del usuario
-    } catch (err) {
-      console.error("Error al actualizar el perfil:", err);
-      setError("No se pudo actualizar el perfil.");
-    }
-  };
 
-  // Actualizar foto de perfil
-  const handleUpdatePhoto = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.put(
-        "http://localhost:5000/api/user/profile-pic",
-        { profilePic: formData.profilePic },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
       setSuccessMessage(response.data.message);
-      fetchUserData(); // Recargar datos del usuario
+      fetchUserData();
     } catch (err) {
-      console.error("Error al actualizar la foto de perfil:", err);
-      setError("No se pudo actualizar la foto de perfil.");
+      setError("⚠️ No se pudo actualizar el perfil.");
     }
   };
 
@@ -108,45 +95,52 @@ function Profile() {
 
   return (
     <div className="profile-container">
-      <h1>Perfil de Usuario</h1>
+      {/* Nombre del usuario */}
+      <h2>{formData.nickname || "Tu Perfil"}</h2>
 
-      <div className="profile-info">
+      {/* Contenedor de Imagen + Puntos */}
+      <div className="profile-header">
+        {/* Imagen de perfil */}
         <div className="photo-container">
-          {user.picture ? (
-            <img src={user.picture} alt="Foto de perfil" className="profile-photo" />
+          {formData.picture ? (
+            <img src={formData.picture} alt="Foto de perfil" className="profile-photo" />
           ) : (
             <span className="placeholder">Sin Foto</span>
           )}
-          <input type="file" onChange={handlePhotoChange} />
-          <button onClick={handleUpdatePhoto}>Actualizar Foto</button>
         </div>
 
-        <div className="profile-details">
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            placeholder="Nombre"
-          />
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            placeholder="Email"
-            disabled // No permitimos que cambie el email
-          />
-          <input
-            type="number"
-            name="points"
-            value={formData.points}
-            onChange={handleInputChange}
-            placeholder="Puntos"
-          />
-          <button onClick={handleUpdateProfile}>Guardar Cambios</button>
-        </div>
+        {/* Puntos */}
+        <div className="points-display">{formData.points} Pts</div>
       </div>
+
+      {/* Formulario de usuario */}
+      <div className="input-group">
+        <label>Nickname</label>
+        <input
+          type="text"
+          name="nickname"
+          value={formData.nickname}
+          onChange={handleInputChange}
+          placeholder="Escribe tu nickname"
+        />
+      </div>
+
+      <div className="input-group">
+        <label>Email</label>
+        <input type="email" name="email" value={formData.email} readOnly />
+      </div>
+
+      <div className="input-group">
+        <label>Puntos</label>
+        <input
+          type="number"
+          name="points"
+          value={formData.points}
+          onChange={handleInputChange}
+        />
+      </div>
+
+      <button onClick={handleUpdateProfile}>Guardar Cambios</button>
 
       {successMessage && <p className="success-message">{successMessage}</p>}
     </div>
