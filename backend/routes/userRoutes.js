@@ -1,5 +1,6 @@
 const express = require("express");
 const User = require("../models/User");
+const RewardRedemption = require("../models/RewardRedemption"); // ✅ Nuevo
 const authMiddleware = require("../middleware/auth");
 
 const router = express.Router();
@@ -13,7 +14,6 @@ router.get("/profile", authMiddleware, async (req, res) => {
             return res.status(401).json({ message: "Token inválido o usuario no autenticado." });
         }
 
-        // 🔹 Buscar usuario por email en la base de datos
         let user = await User.findOne({ email: req.user.email }).select("-password");
 
         if (!user) {
@@ -64,7 +64,7 @@ router.put("/update-profile", authMiddleware, async (req, res) => {
             userHasChanges = true;
         }
         if (user.picture !== picture) {
-            user.picture = picture; // 🔹 Guardamos la imagen de Google
+            user.picture = picture;
             userHasChanges = true;
         }
 
@@ -76,6 +76,22 @@ router.put("/update-profile", authMiddleware, async (req, res) => {
         }
     } catch (error) {
         console.error("❌ Error en la actualización del perfil:", error);
+        res.status(500).json({ message: "Error interno del servidor." });
+    }
+});
+
+// ✅ 🔹 Obtener historial de canjes del usuario autenticado
+router.get("/redemptions", authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const redemptions = await RewardRedemption.find({ user: userId })
+            .populate("reward", "title points imageUrl")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json(redemptions);
+    } catch (error) {
+        console.error("❌ Error obteniendo historial de canjes:", error);
         res.status(500).json({ message: "Error interno del servidor." });
     }
 });

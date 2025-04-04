@@ -17,8 +17,8 @@ const Login = ({ setIsAuthenticated }) => {
       console.log("🔹 Usuario autenticado con Google:", decoded);
 
       // Guardamos el token y la info en sessionStorage
-      sessionStorage.setItem("token", credentialResponse.credential);
-      sessionStorage.setItem("user", JSON.stringify(decoded));
+      localStorage.setItem("token", credentialResponse.credential); // ✅ persistente
+      localStorage.setItem("user", JSON.stringify(decoded));
       setIsAuthenticated(true);
 
       // Enviar datos al backend para guardarlos en la base de datos

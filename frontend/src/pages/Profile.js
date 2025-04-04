@@ -3,11 +3,9 @@ import axios from "axios";
 import "./Profile.css";
 
 function Profile() {
-  const storedUser = sessionStorage.getItem("user") || localStorage.getItem("user");
-  const [user, setUser] = useState(storedUser ? JSON.parse(storedUser) : null);
+  const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-
   const [formData, setFormData] = useState({
     name: "",
     nickname: "",
@@ -16,7 +14,7 @@ function Profile() {
     picture: "",
   });
 
-  const getToken = () => sessionStorage.getItem("token") || localStorage.getItem("token");
+  const getToken = () => localStorage.getItem("token");
 
   const fetchUserData = async () => {
     try {
@@ -30,18 +28,18 @@ function Profile() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (response.data) {
-        setUser(response.data);
-        sessionStorage.setItem("user", JSON.stringify(response.data));
-        setFormData({
-          name: response.data.name || "",
-          nickname: response.data.nickname || "",
-          email: response.data.email || "",
-          points: response.data.points || 0,
-          picture: response.data.picture || "",
-        });
-      }
-    } catch (err) {
+      const userData = response.data;
+
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      setFormData({
+        name: userData.name || "",
+        nickname: userData.nickname || "",
+        email: userData.email || "",
+        points: userData.points || 0,
+        picture: userData.picture || "",
+      });
+    } catch {
       setError("⚠️ Error al cargar los datos del usuario.");
     }
   };
@@ -50,9 +48,8 @@ function Profile() {
     fetchUserData();
   }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+  const handleInputChange = ({ target: { name, value } }) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleUpdateProfile = async () => {
@@ -64,7 +61,7 @@ function Profile() {
       }
 
       if (!formData.email) {
-        setError("⚠️ Error: El correo electrónico es obligatorio.");
+        setError("⚠️ El correo electrónico es obligatorio.");
         return;
       }
 
@@ -75,32 +72,26 @@ function Profile() {
           nickname: formData.nickname,
           points: formData.points,
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       setSuccessMessage(response.data.message);
       fetchUserData();
-    } catch (err) {
+    } catch {
       setError("⚠️ No se pudo actualizar el perfil.");
     }
   };
 
-  if (error) {
-    return <div className="profile-container">{error}</div>;
-  }
-
-  if (!user) {
-    return <div className="profile-container">Cargando datos del usuario...</div>;
-  }
+  if (error) return <div className="profile-container">{error}</div>;
+  if (!user) return <div className="profile-container">Cargando datos del usuario...</div>;
 
   return (
     <div className="profile-container">
-      {/* Nombre del usuario */}
       <h2>{formData.nickname || "Tu Perfil"}</h2>
 
-      {/* Contenedor de Imagen + Puntos */}
       <div className="profile-header">
-        {/* Imagen de perfil */}
         <div className="photo-container">
           {formData.picture ? (
             <img src={formData.picture} alt="Foto de perfil" className="profile-photo" />
@@ -109,11 +100,9 @@ function Profile() {
           )}
         </div>
 
-        {/* Puntos */}
         <div className="points-display">{formData.points} Pts</div>
       </div>
 
-      {/* Formulario de usuario */}
       <div className="input-group">
         <label>Nickname</label>
         <input

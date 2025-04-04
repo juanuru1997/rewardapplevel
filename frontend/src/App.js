@@ -9,8 +9,8 @@ import Profile from "./pages/Profile";
 import Inicio from "./pages/Inicio";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
+import History from "./pages/History"; // ✅ ESTA ES LA CORRECTA
 
-// 🔹 Obtener el CLIENT_ID desde .env
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 if (!GOOGLE_CLIENT_ID) {
@@ -20,21 +20,17 @@ if (!GOOGLE_CLIENT_ID) {
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Verificar autenticación al cargar la app
   useEffect(() => {
     const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token); // Si hay un token, el usuario está autenticado
+    setIsAuthenticated(!!token);
   }, []);
 
   return (
-    // 🔹 Usar GOOGLE_CLIENT_ID desde .env
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Router>
-        {/* Pasamos `isAuthenticated` y `setIsAuthenticated` al Header */}
         <Header isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
 
         <Routes>
-          {/* Ruta pública para login */}
           <Route
             path="/login"
             element={
@@ -46,7 +42,6 @@ function App() {
             }
           />
 
-          {/* Rutas protegidas */}
           <Route
             path="/"
             element={
@@ -67,7 +62,15 @@ function App() {
             path="/profile"
             element={
               <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <Profile /> {/* Renderizar el perfil con datos cargados dinámicamente */}
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/historial"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <History />
               </ProtectedRoute>
             }
           />
