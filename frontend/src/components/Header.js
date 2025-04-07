@@ -40,6 +40,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
             <li>
               <Link to="/" className="nav-item">Inicio</Link>
             </li>
+
             {isAuthenticated && (
               <>
                 <li>
@@ -51,8 +52,12 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
                 <li>
                   <Link to="/historial" className="nav-item">Historial</Link>
                 </li>
+                <li>
+                  <Link to="/admin/points" className="nav-item">Admin</Link>
+                </li>
               </>
             )}
+
             <li>
               {isAuthenticated ? (
                 <span onClick={handleLogout} className="nav-item logout-link">Cerrar Sesión</span>

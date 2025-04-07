@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { GoogleOAuthProvider } from "@react-oauth/google"; 
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Catalog from "./pages/Catalog";
-import Profile from "./pages/Profile"; 
+import Profile from "./pages/Profile";
 import Inicio from "./pages/Inicio";
+import History from "./pages/History";
+import AdminPoints from "./pages/AdminPoints"; // ✅ Ruta de admin
+
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
-import History from "./pages/History"; // ✅ ESTA ES LA CORRECTA
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -18,7 +20,7 @@ if (!GOOGLE_CLIENT_ID) {
 }
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem("token"));
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -41,7 +43,6 @@ function App() {
               )
             }
           />
-
           <Route
             path="/"
             element={
@@ -71,6 +72,14 @@ function App() {
             element={
               <ProtectedRoute isAuthenticated={isAuthenticated}>
                 <History />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/points"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <AdminPoints />
               </ProtectedRoute>
             }
           />

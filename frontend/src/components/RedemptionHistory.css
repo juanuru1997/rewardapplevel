@@ -1,24 +1,89 @@
 .redemption-history {
-    padding: 2rem;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .redemption-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    background: #fff;
-  }
-  
-  .redemption-card img {
-    width: 100px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 5px;
-  }
-  
+  max-width: 800px;
+  margin: auto;
+  padding: 2rem;
+}
+
+.filter-buttons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  gap: 10px;
+}
+
+.filter-buttons button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.filter-buttons button:hover {
+  background-color: #f3f3f3;
+}
+
+.filter-buttons .active {
+  background-color: #25d366;
+  color: white;
+  border-color: #25d366;
+}
+
+.redemption-card {
+  display: flex;
+  align-items: flex-start;
+  background: white;
+  border-left: 6px solid #25d366; /* default: canje */
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  gap: 20px;
+}
+
+.redemption-card[data-type="grant"] {
+  border-left-color: #ff9800;
+}
+
+.redemption-card img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.redemption-card h4 {
+  font-weight: bold;
+  margin: 0 0 8px;
+}
+.filter-buttons button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: bold; /* ✅ Asegura visibilidad del texto */
+  color: #333;        /* ✅ Color de texto más fuerte */
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #25d366;
+  color: white;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
