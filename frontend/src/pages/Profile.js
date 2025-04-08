@@ -71,6 +71,7 @@ function Profile() {
           email: formData.email,
           nickname: formData.nickname,
           points: formData.points,
+          picture: formData.picture
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -94,9 +95,21 @@ function Profile() {
       <div className="profile-header">
         <div className="photo-container">
           {formData.picture ? (
-            <img src={formData.picture} alt="Foto de perfil" className="profile-photo" />
+            <img
+              src={formData.picture}
+              alt="Foto de perfil"
+              className="profile-photo"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://via.placeholder.com/150?text=Avatar";
+              }}
+            />
           ) : (
-            <span className="placeholder">Sin Foto</span>
+            <img
+              src="https://via.placeholder.com/150?text=Avatar"
+              alt="Sin foto"
+              className="profile-photo"
+            />
           )}
         </div>
 

@@ -6,6 +6,10 @@ const JWT_SECRET = process.env.JWT_SECRET || "valor_por_defecto";
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const client = new OAuth2Client(CLIENT_ID);
 
+// ✅ Lista de correos autorizados como administradores
+const adminEmails = ["vmelloni@applevel.com", "juansantana061997@gmail.com"];
+
+// ✅ Middleware de autenticación
 const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -16,6 +20,8 @@ const authMiddleware = async (req, res, next) => {
   const token = authHeader.split(" ")[1];
 
   try {
+    let user;
+
     if (token.includes(".")) {
       try {
         const ticket = await client.verifyIdToken({
@@ -24,8 +30,7 @@ const authMiddleware = async (req, res, next) => {
         });
 
         const payload = ticket.getPayload();
-
-        let user = await User.findOne({ email: payload.email });
+        user = await User.findOne({ email: payload.email });
 
         if (!user) {
           user = new User({
@@ -34,59 +39,67 @@ const authMiddleware = async (req, res, next) => {
             email_verified: payload.email_verified,
             picture: payload.picture || "https://via.placeholder.com/150",
             points: 0,
+            isAdmin: adminEmails.includes(payload.email), // ✅ asignar admin si está en lista
           });
-
           await user.save();
         } else {
-          let userHasChanges = false;
+          let updated = false;
 
           if (!user.name || user.name === "Usuario") {
             user.name = payload.name;
-            userHasChanges = true;
+            updated = true;
           }
 
           if (!user.picture || user.picture === "") {
             user.picture = payload.picture;
-            userHasChanges = true;
+            updated = true;
           }
 
           if (!user.email_verified && payload.email_verified) {
             user.email_verified = true;
-            userHasChanges = true;
+            updated = true;
           }
 
-          if (userHasChanges) {
-            await user.save();
+          // ✅ asignar admin si no lo tenía
+          if (!user.isAdmin && adminEmails.includes(user.email)) {
+            user.isAdmin = true;
+            updated = true;
           }
+
+          if (updated) await user.save();
         }
-
-        req.user = {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-          picture: user.picture,
-          email_verified: user.email_verified,
-        };
-
-        return next();
-      } catch (googleError) {
+      } catch {
         const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] });
-
-        req.user = {
-          id: decoded.id,
-          email: decoded.email,
-          name: decoded.name || "Usuario",
-          picture: decoded.picture || "",
-        };
-
-        return next();
+        user = await User.findById(decoded.id);
+        if (!user) throw new Error("Usuario no encontrado");
       }
     }
 
-    return res.status(401).json({ message: "Token inválido." });
+    if (!user) return res.status(401).json({ message: "Token inválido." });
+
+    req.user = {
+      id: user._id,
+      email: user.email,
+      name: user.name,
+      picture: user.picture,
+      email_verified: user.email_verified,
+      isAdmin: user.isAdmin || false,
+    };
+
+    next();
   } catch (err) {
+    console.error("❌ authMiddleware error:", err);
     return res.status(401).json({ message: "Token inválido o expirado." });
   }
 };
 
+// ✅ Middleware exclusivo para administradores
+const adminOnly = (req, res, next) => {
+  if (!req.user?.isAdmin) {
+    return res.status(403).json({ message: "Acceso denegado. Solo administradores." });
+  }
+  next();
+};
+
 module.exports = authMiddleware;
+module.exports.adminOnly = adminOnly;

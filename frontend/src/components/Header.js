@@ -4,6 +4,7 @@ import './Header.css';
 
 const Header = ({ isAuthenticated, setIsAuthenticated }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
   const handleScroll = () => {
@@ -11,21 +12,31 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
   };
 
   const handleLogout = () => {
-    const confirmLogout = window.confirm("¿Estás seguro de que deseas cerrar sesión?");
-    if (confirmLogout) {
+    if (window.confirm("¿Estás seguro de que deseas cerrar sesión?")) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setIsAuthenticated(false);
+      setIsAdmin(false);
       navigate('/login');
     }
   };
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
+
+    const userJSON = localStorage.getItem("user");
+    try {
+      const user = userJSON ? JSON.parse(userJSON) : null;
+      setIsAdmin(user?.isAdmin || false);
+    } catch (err) {
+      console.error("Error leyendo usuario del localStorage:", err);
+      setIsAdmin(false);
+    }
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [isAuthenticated]);
 
   return (
     <header className={`page-header ${isScrolled ? 'scrolled' : ''}`}>
@@ -52,9 +63,11 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
                 <li>
                   <Link to="/historial" className="nav-item">Historial</Link>
                 </li>
-                <li>
-                  <Link to="/admin/points" className="nav-item">Admin</Link>
-                </li>
+                {isAdmin && (
+                  <li>
+                    <Link to="/admin/points" className="nav-item">Admin</Link>
+                  </li>
+                )}
               </>
             )}
 

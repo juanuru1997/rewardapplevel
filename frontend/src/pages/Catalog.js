@@ -9,6 +9,9 @@ const Catalog = () => {
   const [selectedReward, setSelectedReward] = useState(null);
   const [pages, setPages] = useState({});
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [minPoints, setMinPoints] = useState(0);
+  const [userPoints, setUserPoints] = useState(0);
 
   const token = localStorage.getItem("token");
 
@@ -33,6 +36,10 @@ const Catalog = () => {
         setLoading(false);
       }
     };
+
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    setUserPoints(storedUser?.points || 0);
+
     fetchRewards();
   }, []);
 
@@ -68,19 +75,48 @@ const Catalog = () => {
       }
 
       if (!res.ok) throw new Error(data.message || "Error al canjear");
+
       showNotification(`🎉 Canjeaste: ${reward.title}`);
+
+      // Actualizar puntos del usuario localmente
+      setUserPoints((prev) => prev - reward.points);
     } catch (err) {
       showNotification(`❌ ${err.message}`);
     }
   };
 
-  const grouped = groupByCategory(rewards);
+  const filteredRewards = rewards.filter(
+    (r) =>
+      r.title.toLowerCase().includes(search.toLowerCase()) &&
+      r.points >= minPoints
+  );
+
+  const grouped = groupByCategory(filteredRewards);
 
   return (
     <div className="catalog-container">
       {notification && (
         <Notification message={notification} onClose={() => setNotification(null)} />
       )}
+
+      <div className="filters">
+        <input
+          type="text"
+          placeholder="🔍 Buscar recompensa..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <select
+          value={minPoints}
+          onChange={(e) => setMinPoints(Number(e.target.value))}
+        >
+          <option value={0}>Todos los puntos</option>
+          <option value={100}>+100 pts</option>
+          <option value={300}>+300 pts</option>
+          <option value={500}>+500 pts</option>
+        </select>
+      </div>
 
       {loading ? (
         <p>Cargando recompensas...</p>
@@ -95,24 +131,37 @@ const Catalog = () => {
             <div key={category} className="category-section">
               <h2>{category.toUpperCase()}</h2>
               <div className="carousel">
-                {visible.map((reward) => (
-                  <div className="reward-card" key={reward._id}>
-                    <img
-                      src={reward.imageUrl}
-                      alt={reward.title}
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                    />
-                    <h3>{reward.title}</h3>
-                    <p>{reward.description}</p>
-                    <button
-                      className="redeem-button"
-                      onClick={() => setSelectedReward(reward)}
-                    >
-                      Canjear Recompensa
-                    </button>
-                  </div>
-                ))}
+                {visible.map((reward) => {
+                  const canRedeem = reward.stock > 0 && userPoints >= reward.points;
+
+                  return (
+                    <div className="reward-card" key={reward._id}>
+                      <img
+                        src={reward.imageUrl}
+                        alt={reward.title}
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
+                      <h3>{reward.title}</h3>
+                      <p>{reward.description}</p>
+                      <p>💰 <strong>{reward.points} pts</strong></p>
+                      <p>🎫 Stock: {reward.stock}</p>
+
+                      {canRedeem ? (
+                        <button
+                          className="redeem-button"
+                          onClick={() => setSelectedReward(reward)}
+                        >
+                          Canjear Recompensa
+                        </button>
+                      ) : (
+                        <button className="redeem-button disabled" disabled>
+                          Sin puntos suficientes
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
               <div className="dots">
                 {Array.from({ length: totalPages }).map((_, i) => (

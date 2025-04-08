@@ -1,0 +1,70 @@
+.admin-points {
+    max-width: 600px;
+    margin: auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+  
+  .admin-points h2 {
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+    color: #333;
+    text-align: center;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: #25d366;
+    outline: none;
+  }
+  
+  .btn-green {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(90deg, #25d366, #2eaf7d);
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .btn-green:hover {
+    background: linear-gradient(90deg, #20c35b, #269a6c);
+  }
+  
+  .message {
+    background: #f1fef4;
+    border-left: 4px solid #25d366;
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    color: #222;
+  }
+  

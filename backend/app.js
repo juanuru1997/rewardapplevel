@@ -34,7 +34,7 @@ app.use(express.json());
 app.use("/api/user", userRoutes);
 app.use("/api/rewards", rewardRoutes);
 
-// ✅ Función para validar URLs de imagen
+// ✅ Verificador de imagen válida
 const isValidUrl = (url) => typeof url === "string" && url.startsWith("http");
 
 // ✅ Google Auth
@@ -50,30 +50,50 @@ app.post("/auth/google-auth", async (req, res) => {
     const { email, name, picture, email_verified } = payload;
     let user = await User.findOne({ email });
 
+    // 🟢 Asignar admin automáticamente si el correo coincide
+    const adminEmails = ["vmelloni@applevel.com", "juansantana061997@gmail.com"];
+
     if (!user) {
       user = new User({
         name: name || "Usuario",
         email,
         email_verified: !!email_verified,
         picture: isValidUrl(picture) ? picture : "https://via.placeholder.com/150",
-        points: 0
+        points: 0,
+        isAdmin: adminEmails.includes(email),
       });
       await user.save();
     } else {
       let changes = false;
       if (!user.name || user.name === "Usuario") { user.name = name; changes = true; }
-      if ((!user.picture || user.picture.includes("placeholder")) && isValidUrl(picture)) { user.picture = picture; changes = true; }
-      if (!user.email_verified && email_verified) { user.email_verified = true; changes = true; }
+      if ((!user.picture || user.picture.includes("placeholder")) && isValidUrl(picture)) {
+        user.picture = picture; changes = true;
+      }
+      if (!user.email_verified && email_verified) {
+        user.email_verified = true;
+        changes = true;
+      }
+      if (!user.isAdmin && adminEmails.includes(email)) {
+        user.isAdmin = true;
+        changes = true;
+      }
       if (changes) await user.save();
     }
 
+    // 🔐 Firmar JWT con isAdmin
     const token = jwt.sign(
-      { id: user._id, email: user.email, name: user.name, picture: user.picture },
+      {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        picture: user.picture,
+        isAdmin: user.isAdmin || false
+      },
       JWT_SECRET,
       { algorithm: "HS256", expiresIn: "30d" }
     );
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "Inicio de sesión exitoso",
       token,
       user: {
@@ -82,7 +102,8 @@ app.post("/auth/google-auth", async (req, res) => {
         email: user.email,
         picture: user.picture,
         email_verified: user.email_verified,
-        points: user.points
+        points: user.points,
+        isAdmin: user.isAdmin || false
       }
     });
   } catch (err) {
@@ -91,7 +112,7 @@ app.post("/auth/google-auth", async (req, res) => {
   }
 });
 
-// ✅ Obtener perfil
+// ✅ Obtener perfil del usuario autenticado
 app.get("/api/user/profile", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
@@ -109,7 +130,8 @@ app.get("/api/user/profile", async (req, res) => {
       email: user.email,
       picture: user.picture || "https://via.placeholder.com/150",
       nickname: user.nickname || "",
-      points: user.points || 0
+      points: user.points || 0,
+      isAdmin: user.isAdmin || false
     });
   } catch (err) {
     console.error("❌ Error obteniendo perfil:", err);
@@ -127,7 +149,6 @@ app.put("/api/user/update-profile", async (req, res) => {
     if (!user) return res.status(404).json({ message: "Usuario no encontrado." });
 
     let hasChanges = false;
-
     if (user.nickname !== nickname) { user.nickname = nickname; hasChanges = true; }
     if (user.points !== points) { user.points = points; hasChanges = true; }
     if (user.picture !== picture) { user.picture = picture; hasChanges = true; }

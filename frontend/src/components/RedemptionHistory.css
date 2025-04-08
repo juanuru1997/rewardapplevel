@@ -18,6 +18,8 @@
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s ease;
+  font-weight: bold;
+  color: #333;
 }
 
 .filter-buttons button:hover {
@@ -34,7 +36,7 @@
   display: flex;
   align-items: flex-start;
   background: white;
-  border-left: 6px solid #25d366; /* default: canje */
+  border-left: 6px solid #25d366;
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 20px;
@@ -52,20 +54,12 @@
   object-fit: contain;
   border-radius: 8px;
 }
+
 .redemption-card h4 {
   font-weight: bold;
   margin: 0 0 8px;
 }
-.filter-buttons button {
-  padding: 8px 16px;
-  border: 1px solid #ccc;
-  background: white;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  font-weight: bold; /* ✅ Asegura visibilidad del texto */
-  color: #333;        /* ✅ Color de texto más fuerte */
-}
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -86,4 +80,81 @@
 .pagination button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* 🔸 Sección de selección de usuario (admin) */
+.user-select {
+  margin: 1rem 0 2rem;
+  text-align: center;
+}
+
+.user-select label {
+  font-weight: bold;
+  margin-right: 8px;
+  font-size: 1rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.user-select select {
+  padding: 10px;
+  width: 100%;
+  max-width: 400px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* ✅ Visual cuando el usuario ya está seleccionado */
+.user-selected-card {
+  background: #e9fdf1;
+  border: 1px solid #25d366;
+  border-radius: 10px;
+  font-weight: bold;
+  padding: 12px 20px;
+  margin-top: 1rem;
+  color: #222;
+  font-size: 1.05rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* 🎯 Botón: Cambiar usuario */
+.user-selected-card {
+  background: #e9fdf1;
+  border: 1px solid #25d366;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  color: #222;
+  max-width: 500px;
+  margin: 0 auto 2rem auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.user-selected-card .username {
+  font-size: 80rem; 
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #1c1c1c;
+}
+
+.user-selected-card button {
+  background: linear-gradient(to right, #25d366, #3c9d7b);
+  border: none;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 10px 22px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  width: fit-content;         /* ✅ No se expande de más */
+  min-width: 180px;           /* 🔸 Justo un ancho cómodo */
 }

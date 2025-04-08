@@ -4,7 +4,7 @@ import RedemptionHistory from "../components/RedemptionHistory";
 const History = () => {
   return (
     <div style={{ padding: "2rem" }}>
-      <h1>🎁 Historial de Canjes</h1>
+      <h1>📜 Historial de Actividad</h1>
       <RedemptionHistory />
     </div>
   );

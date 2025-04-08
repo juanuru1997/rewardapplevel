@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "./AdminPoints.css";
 
 const AdminPoints = () => {
   const [users, setUsers] = useState([]);
@@ -9,29 +10,19 @@ const AdminPoints = () => {
 
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/user/all", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-        console.log("📦 Users API response:", data);
-
-        if (!res.ok) throw new Error(data.message || "Error al obtener usuarios");
-        setUsers(data);
-      } catch (err) {
-        console.error("❌ Error cargando usuarios:", err);
-        setMessage("❌ Error cargando usuarios.");
-        setUsers([]); // aseguramos que no quede en estado inválido
-      }
-    };
-
-    fetchUsers();
-  }, [token]);
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/user/all", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setUsers(data);
+    } catch (err) {
+      console.error("❌ Error cargando usuarios:", err);
+      setMessage("❌ Error cargando usuarios.");
+    }
+  };
 
   const handleGrant = async () => {
     if (!selectedUser || !points || !reason) {
@@ -55,7 +46,7 @@ const AdminPoints = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      setMessage(`🎉 ${data.message}`);
+      setMessage(`✅ ${data.message}`);
       setPoints("");
       setReason("");
     } catch (err) {
@@ -64,55 +55,49 @@ const AdminPoints = () => {
     }
   };
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   return (
-    <div style={{ maxWidth: 500, margin: "auto", padding: 20 }}>
-      <h2>🎯 Asignar Puntos (Admin)</h2>
+    <div className="admin-points">
+      <h2>🎯 Panel de Administración</h2>
 
-      {message && <div style={{ marginBottom: 15 }}>{message}</div>}
+      {message && <div className="message">{message}</div>}
 
-      <label>👤 Usuario:</label>
-      <select
-        value={selectedUser}
-        onChange={(e) => setSelectedUser(e.target.value)}
-        style={{ width: "100%", padding: 10, marginBottom: 15 }}
-      >
-        <option value="">Seleccionar usuario</option>
-        {Array.isArray(users) &&
-          users.map((u) => (
+      <div className="form-group">
+        <label>👤 Usuario:</label>
+        <select value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)}>
+          <option value="">Seleccionar usuario</option>
+          {users.map((u) => (
             <option key={u._id} value={u._id}>
               {u.name || u.email} - ({u.email})
             </option>
           ))}
-      </select>
+        </select>
+      </div>
 
-      <label>🏆 Puntos a otorgar:</label>
-      <input
-        type="number"
-        value={points}
-        onChange={(e) => setPoints(e.target.value)}
-        style={{ width: "100%", padding: 10, marginBottom: 15 }}
-      />
+      <div className="form-group">
+        <label>🏆 Puntos a otorgar:</label>
+        <input
+          type="number"
+          value={points}
+          onChange={(e) => setPoints(e.target.value)}
+          placeholder="Cantidad de puntos"
+        />
+      </div>
 
-      <label>📝 Motivo:</label>
-      <input
-        type="text"
-        value={reason}
-        onChange={(e) => setReason(e.target.value)}
-        placeholder="Ej: Participación en desafío semanal"
-        style={{ width: "100%", padding: 10, marginBottom: 15 }}
-      />
+      <div className="form-group">
+        <label>📝 Motivo:</label>
+        <input
+          type="text"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Ej: Participación en actividad"
+        />
+      </div>
 
-      <button
-        onClick={handleGrant}
-        style={{
-          padding: 10,
-          width: "100%",
-          backgroundColor: "#25d366",
-          color: "white",
-          border: "none",
-          borderRadius: 8,
-        }}
-      >
+      <button className="btn-green" onClick={handleGrant}>
         Asignar Puntos
       </button>
     </div>

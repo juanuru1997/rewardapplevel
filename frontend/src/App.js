@@ -8,7 +8,7 @@ import Catalog from "./pages/Catalog";
 import Profile from "./pages/Profile";
 import Inicio from "./pages/Inicio";
 import History from "./pages/History";
-import AdminPoints from "./pages/AdminPoints"; // ✅ Ruta de admin
+import AdminPoints from "./pages/AdminPoints";
 
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -78,7 +78,7 @@ function App() {
           <Route
             path="/admin/points"
             element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ProtectedRoute isAuthenticated={isAuthenticated} isAdminRequired={true}>
                 <AdminPoints />
               </ProtectedRoute>
             }
