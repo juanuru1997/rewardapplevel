@@ -30,6 +30,7 @@ const RedemptionHistory = () => {
     setLoading(true);
     try {
       const userParam = selectedUser ? `&userId=${selectedUser}` : "";
+
       const [redeemRes, grantsRes] = await Promise.all([
         fetch(`http://localhost:5000/api/user/redemptions?page=${page}&limit=5${userParam}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -58,7 +59,6 @@ const RedemptionHistory = () => {
 
       setHistory(allHistory);
       setTotalPages(Math.max(redeemData.totalPages, grantsData.totalPages));
-      setPage(Math.max(redeemData.currentPage, grantsData.currentPage));
     } catch (error) {
       console.error("❌ Error al traer historial:", error);
     } finally {
@@ -98,7 +98,10 @@ const RedemptionHistory = () => {
               <select
                 id="user-select"
                 value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value)}
+                onChange={(e) => {
+                  setPage(1);
+                  setSelectedUser(e.target.value);
+                }}
               >
                 <option value="">-- Mi actividad --</option>
                 {users.map((u) => (

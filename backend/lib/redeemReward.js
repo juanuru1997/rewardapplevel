@@ -6,7 +6,7 @@ const sendRedemptionEmails = require("./sendRedemptionEmails");
 
 const redeemReward = async ({ userId, rewardId }) => {
   const session = await mongoose.startSession();
-  session.startTransaction();
+  await session.startTransaction();
 
   try {
     const [user, reward] = await Promise.all([
@@ -41,15 +41,14 @@ const redeemReward = async ({ userId, rewardId }) => {
 
     // ✅ Finalizar la transacción
     await session.commitTransaction();
-    session.endSession();
-
-    // ✅ Enviar email FUERA de la transacción
     sendRedemptionEmails(user, reward);
-
+    await session.endSession();
+    
     return {
       success: true,
       message: "Canje realizado con éxito.",
       updatedPoints: user.points,
+      rewardTitle: reward.title, // ✅ Agregado: título para usar en la notificación
     };
   } catch (error) {
     await session.abortTransaction();

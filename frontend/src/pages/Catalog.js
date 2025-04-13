@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import "./Catalog.css";
 import Notification from "../components/Notification";
 import ConfirmModal from "../components/ConfirmModal";
+import RewardEditorModal from "../components/RewardEditorModal";
+
+const API_URL = "http://localhost:5000"; // 🧩 BACKEND FIJO
 
 const Catalog = () => {
   const [rewards, setRewards] = useState([]);
@@ -13,19 +16,32 @@ const Catalog = () => {
   const [minPoints, setMinPoints] = useState(0);
   const [userPoints, setUserPoints] = useState(0);
 
+  const [showEditor, setShowEditor] = useState(false);
+  const [editingReward, setEditingReward] = useState(null);
+
   const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const isAdmin = user?.isAdmin;
 
   const groupByCategory = (items) =>
     items.reduce((acc, reward) => {
-      acc[reward.category] = acc[reward.category] || [];
-      acc[reward.category].push(reward);
+      const category = reward.category || "Sin categoría";
+      acc[category] = acc[category] || [];
+      acc[category].push(reward);
       return acc;
     }, {});
+
+  const getImageSrc = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    if (url.startsWith("/assets") || url.startsWith("assets")) return url;
+    return `${API_URL}/api/uploads/${url}`;
+  };
 
   useEffect(() => {
     const fetchRewards = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/rewards");
+        const res = await fetch(`${API_URL}/api/rewards`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Error al cargar recompensas");
         setRewards(data);
@@ -56,7 +72,7 @@ const Catalog = () => {
     if (!token) return showNotification("⚠️ No estás autenticado");
 
     try {
-      const res = await fetch("http://localhost:5000/api/rewards/redeem", {
+      const res = await fetch(`${API_URL}/api/rewards/redeem`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +83,6 @@ const Catalog = () => {
 
       const text = await res.text();
       let data;
-
       try {
         data = JSON.parse(text);
       } catch {
@@ -77,9 +92,52 @@ const Catalog = () => {
       if (!res.ok) throw new Error(data.message || "Error al canjear");
 
       showNotification(`🎉 Canjeaste: ${reward.title}`);
-
-      // Actualizar puntos del usuario localmente
       setUserPoints((prev) => prev - reward.points);
+    } catch (err) {
+      showNotification(`❌ ${err.message}`);
+    }
+  };
+
+  const openEditor = (reward) => {
+    setEditingReward(reward || null);
+    setShowEditor(true);
+  };
+
+  const saveReward = async (data) => {
+    try {
+      const method = editingReward ? "PUT" : "POST";
+      const url = editingReward
+        ? `${API_URL}/api/rewards/${editingReward._id}`
+        : `${API_URL}/api/rewards`;
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Error al guardar");
+
+      showNotification("✅ Recompensa guardada");
+
+      setRewards((prev) => {
+        const updated = editingReward
+          ? prev.map((r) => (r._id === editingReward._id ? result : r))
+          : [...prev, result];
+
+        const updatedPages = { ...pages };
+        const category = result.category || "Sin categoría";
+        if (!(category in updatedPages)) {
+          updatedPages[category] = 0;
+          setPages(updatedPages);
+        }
+
+        return updated;
+      });
     } catch (err) {
       showNotification(`❌ ${err.message}`);
     }
@@ -87,7 +145,7 @@ const Catalog = () => {
 
   const filteredRewards = rewards.filter(
     (r) =>
-      r.title.toLowerCase().includes(search.toLowerCase()) &&
+      (r.title?.toLowerCase() || "").includes(search.toLowerCase()) &&
       r.points >= minPoints
   );
 
@@ -99,6 +157,12 @@ const Catalog = () => {
         <Notification message={notification} onClose={() => setNotification(null)} />
       )}
 
+      {isAdmin && (
+        <div style={{ textAlign: "right", marginBottom: "10px" }}>
+          <button onClick={() => openEditor(null)}>➕ Nueva Recompensa</button>
+        </div>
+      )}
+
       <div className="filters">
         <input
           type="text"
@@ -106,11 +170,7 @@ const Catalog = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-
-        <select
-          value={minPoints}
-          onChange={(e) => setMinPoints(Number(e.target.value))}
-        >
+        <select value={minPoints} onChange={(e) => setMinPoints(Number(e.target.value))}>
           <option value={0}>Todos los puntos</option>
           <option value={100}>+100 pts</option>
           <option value={300}>+300 pts</option>
@@ -137,14 +197,24 @@ const Catalog = () => {
                   return (
                     <div className="reward-card" key={reward._id}>
                       <img
-                        src={reward.imageUrl}
-                        alt={reward.title}
+                        src={getImageSrc(reward.imageUrl)}
+                        alt={reward.title || "Recompensa"}
                         loading="lazy"
                         referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          console.warn("⚠️ Imagen no cargó:", reward.imageUrl);
+                          if (!e.target.src.includes("placeholder.com")) {
+                            e.target.src =
+                              "https://via.placeholder.com/150?text=Sin+imagen";
+                          }
+                        }}
                       />
+
                       <h3>{reward.title}</h3>
                       <p>{reward.description}</p>
-                      <p>💰 <strong>{reward.points} pts</strong></p>
+                      <p>
+                        💰 <strong>{reward.points} pts</strong>
+                      </p>
                       <p>🎫 Stock: {reward.stock}</p>
 
                       {canRedeem ? (
@@ -157,6 +227,15 @@ const Catalog = () => {
                       ) : (
                         <button className="redeem-button disabled" disabled>
                           Sin puntos suficientes
+                        </button>
+                      )}
+
+                      {isAdmin && (
+                        <button
+                          className="edit-button"
+                          onClick={() => openEditor(reward)}
+                        >
+                          ✏️ Editar
                         </button>
                       )}
                     </div>
@@ -185,6 +264,15 @@ const Catalog = () => {
         }}
         onCancel={() => setSelectedReward(null)}
       />
+
+      {showEditor && (
+        <RewardEditorModal
+          reward={editingReward}
+          onClose={() => setShowEditor(false)}
+          onSave={saveReward}
+          categories={[...new Set(rewards.map((r) => r.category).filter(Boolean))]}
+        />
+      )}
     </div>
   );
 };

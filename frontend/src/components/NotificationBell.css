@@ -1,0 +1,134 @@
+.notification-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-right: 20px;
+  }
+  
+  .bell-icon {
+    cursor: pointer;
+    background-color: #f27c1f;
+    color: white;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .bell-icon .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ffc107;
+    color: #000;
+    border-radius: 50%;
+    font-size: 12px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  
+  .dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 420px;
+    max-height: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+    overflow-y: auto;
+  }
+  
+  .dropdown-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .dropdown-header strong {
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .notif-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .notif-item.unread {
+    background-color: #fff8e1;
+    font-weight: 600;
+  }
+  
+  .notif-left {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: flex-start;
+    width: 100%;
+  }
+  
+  .notif-text {
+    color: #333;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    line-height: 1.4;
+  }
+  
+  .delete-btn {
+    background: transparent !important;
+    border: none;
+    cursor: pointer;
+    color: #bbb;
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+  }
+  
+  .delete-btn:hover {
+    color: #dc3545;
+    background: transparent !important;
+  }
+  
+  .notif-actions {
+    padding: 10px 16px;
+    border-top: 1px solid #eee;
+    text-align: right;
+  }
+  
+  .notif-actions button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .empty {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-size: 14px;
+  }
+  

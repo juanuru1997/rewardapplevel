@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Provider } from "react-redux";
+import store from "./store/store";
 
 import Login from "./pages/Login";
 import Home from "./pages/Home";
@@ -10,8 +12,11 @@ import Inicio from "./pages/Inicio";
 import History from "./pages/History";
 import AdminPoints from "./pages/AdminPoints";
 
-import Header from "./components/Header";
+import Header from "./components/Header"; // Sidebar
+import NotificationBell from "./components/NotificationBell"; // 🔔 Notificaciones
 import ProtectedRoute from "./components/ProtectedRoute";
+
+import "./App.css";
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -19,19 +24,19 @@ if (!GOOGLE_CLIENT_ID) {
   console.error("❌ ERROR: REACT_APP_GOOGLE_CLIENT_ID no está definido en .env. Verifica tu configuración.");
 }
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem("token"));
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
-  }, []);
+function Layout({ isAuthenticated, setIsAuthenticated }) {
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
 
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <Router>
-        <Header isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
-
+    <>
+      <Header isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
+      <div className="main-content">
+        {!isLoginPage && (
+          <div className="topbar">
+            <NotificationBell />
+          </div>
+        )}
         <Routes>
           <Route
             path="/login"
@@ -84,8 +89,30 @@ function App() {
             }
           />
         </Routes>
-      </Router>
-    </GoogleOAuthProvider>
+      </div>
+    </>
+  );
+}
+
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem("token"));
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  return (
+    <Provider store={store}>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <Router>
+          <Layout
+            isAuthenticated={isAuthenticated}
+            setIsAuthenticated={setIsAuthenticated}
+          />
+        </Router>
+      </GoogleOAuthProvider>
+    </Provider>
   );
 }
 

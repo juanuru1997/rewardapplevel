@@ -11,24 +11,30 @@ const Login = ({ setIsAuthenticated }) => {
 
   const handleGoogleLoginSuccess = async (credentialResponse) => {
     try {
-      const token = credentialResponse.credential;
-      localStorage.setItem("token", token);
+      const googleToken = credentialResponse.credential;
 
-      const response = await axios.get("http://localhost:5000/api/user/profile", {
-        headers: { Authorization: `Bearer ${token}` },
+      // ✅ Intercambiamos token de Google por nuestro JWT en el backend
+      const res = await axios.post("http://localhost:5000/auth/google-auth", {
+        credential: googleToken,
       });
 
-      const userData = response.data;
-      localStorage.setItem("user", JSON.stringify(userData));
+      const { token, user } = res.data;
+
+      // ✅ Guardamos token JWT del backend y datos del usuario
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
       setIsAuthenticated(true);
       navigate("/");
     } catch (err) {
       console.error("❌ Error al manejar Google Login:", err);
+      alert("Error al iniciar sesión con Google. Intenta nuevamente.");
     }
   };
 
   const handleGoogleLoginError = () => {
     console.error("❌ Error durante el inicio de sesión con Google.");
+    alert("Error con Google Login. Reintenta.");
   };
 
   return (
@@ -37,7 +43,10 @@ const Login = ({ setIsAuthenticated }) => {
         <div className="login-box">
           <h2>Bienvenido a AppLevero</h2>
           <p>Inicia sesión con tu cuenta de Google para continuar</p>
-          <GoogleLogin onSuccess={handleGoogleLoginSuccess} onError={handleGoogleLoginError} />
+          <GoogleLogin
+            onSuccess={handleGoogleLoginSuccess}
+            onError={handleGoogleLoginError}
+          />
         </div>
       </div>
     </GoogleOAuthProvider>

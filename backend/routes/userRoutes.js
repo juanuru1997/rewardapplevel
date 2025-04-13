@@ -1,10 +1,10 @@
 const express = require("express");
+const router = express.Router();
 const User = require("../models/User");
 const RewardRedemption = require("../models/RewardRedemption");
 const PointGrant = require("../models/PointGrant");
+const Notification = require("../models/Notification");
 const authMiddleware = require("../middleware/auth");
-
-const router = express.Router();
 
 // 🔒 Middleware para verificar si es admin
 const requireAdmin = async (req, res, next) => {
@@ -20,7 +20,7 @@ const requireAdmin = async (req, res, next) => {
   next();
 };
 
-// 🔹 Perfil
+// 🔹 Obtener perfil del usuario
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
     const user = await User.findOne({ email: req.user.email }).select("-password");
@@ -155,6 +155,12 @@ router.post("/grant-points", authMiddleware, requireAdmin, async (req, res) => {
     });
 
     await grant.save();
+
+    // ✅ Crear notificación para el usuario
+    await Notification.create({
+      user: userId,
+      message: `✨ Has recibido ${points} puntos. Motivo: ${reason}`,
+    });
 
     res.status(200).json({
       message: `✅ ${points} puntos asignados a ${user.email}`,

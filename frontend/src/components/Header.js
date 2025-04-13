@@ -1,87 +1,129 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import './Header.css';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import {
+  FaHome,
+  FaGift,
+  FaUser,
+  FaHistory,
+  FaTools,
+  FaSignOutAlt,
+  FaSignInAlt,
+} from "react-icons/fa";
+import "./Header.css";
 
 const Header = ({ isAuthenticated, setIsAuthenticated }) => {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [userPoints, setUserPoints] = useState(0);
   const navigate = useNavigate();
-
-  const handleScroll = () => {
-    setIsScrolled(window.scrollY > 50);
-  };
+  const location = useLocation();
 
   const handleLogout = () => {
     if (window.confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       setIsAuthenticated(false);
       setIsAdmin(false);
-      navigate('/login');
+      setUserPoints(0);
+      navigate("/login");
     }
   };
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-
-    const userJSON = localStorage.getItem("user");
-    try {
-      const user = userJSON ? JSON.parse(userJSON) : null;
-      setIsAdmin(user?.isAdmin || false);
-    } catch (err) {
-      console.error("Error leyendo usuario del localStorage:", err);
+    const token = localStorage.getItem("token");
+    if (!token) {
       setIsAdmin(false);
+      return;
     }
 
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/user/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const userData = res.data;
+        setIsAdmin(userData?.isAdmin || false);
+        setUserPoints(userData?.points || 0);
+      } catch (err) {
+        console.error("Error al obtener puntos:", err);
+      }
     };
+
+    fetchUser();
   }, [isAuthenticated]);
 
+  const navLinks = [
+    { to: "/", label: "Inicio", icon: <FaHome /> },
+    { to: "/catalog", label: "Catálogo", icon: <FaGift />, auth: true },
+    { to: "/profile", label: "Perfil", icon: <FaUser />, auth: true },
+    { to: "/historial", label: "Historial", icon: <FaHistory />, auth: true },
+    { to: "/admin/points", label: "Admin", icon: <FaTools />, auth: true, admin: true },
+  ];
+
   return (
-    <header className={`page-header ${isScrolled ? 'scrolled' : ''}`}>
-      <div className="header-content">
-        <div className="logo">
-          <img src="/assets/logo.png" alt="Logo" className="logo-img" />
-          <h1 className="title">APPLEVEL REWARDS</h1>
-        </div>
-
-        <nav className="nav-menu">
-          <ul>
-            <li>
-              <Link to="/" className="nav-item">Inicio</Link>
-            </li>
-
-            {isAuthenticated && (
-              <>
-                <li>
-                  <Link to="/catalog" className="nav-item">Catálogo</Link>
-                </li>
-                <li>
-                  <Link to="/profile" className="nav-item">Perfil</Link>
-                </li>
-                <li>
-                  <Link to="/historial" className="nav-item">Historial</Link>
-                </li>
-                {isAdmin && (
-                  <li>
-                    <Link to="/admin/points" className="nav-item">Admin</Link>
-                  </li>
-                )}
-              </>
-            )}
-
-            <li>
-              {isAuthenticated ? (
-                <span onClick={handleLogout} className="nav-item logout-link">Cerrar Sesión</span>
-              ) : (
-                <Link to="/login" className="nav-item">Login</Link>
-              )}
-            </li>
-          </ul>
-        </nav>
+    <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
+      <div className="logo-section">
+        {!collapsed && (
+          <>
+            <img src="/assets/logo.png" alt="Logo" className="logo-img" />
+            <div className="logo-text">
+              <h1 className="sidebar-title">APPLEVEL</h1>
+              <span className="sidebar-subtitle">REWARDS</span>
+            </div>
+          </>
+        )}
       </div>
-    </header>
+
+      {!collapsed && (
+        <div className="user-points-container">
+          <span className="user-points">⭐ {userPoints} pts</span>
+        </div>
+      )}
+
+      <nav className="sidebar-nav">
+        <ul>
+          {navLinks.map(({ to, label, icon, auth, admin }) => {
+            if (auth && !isAuthenticated) return null;
+            if (admin && !isAdmin) return null;
+
+            return (
+              <li key={label}>
+                <Link
+                  to={to}
+                  className={`sidebar-link ${location.pathname === to ? "active" : ""}`}
+                >
+                  {icon}
+                  {!collapsed && <span>{label}</span>}
+                </Link>
+              </li>
+            );
+          })}
+          {isAuthenticated ? (
+            <li>
+              <span onClick={handleLogout} className="sidebar-link logout">
+                <FaSignOutAlt />
+                {!collapsed && <span>Cerrar Sesión</span>}
+              </span>
+            </li>
+          ) : (
+            <li>
+              <Link to="/login" className="sidebar-link">
+                <FaSignInAlt />
+                {!collapsed && <span>Login</span>}
+              </Link>
+            </li>
+          )}
+        </ul>
+      </nav>
+
+      <div className="sidebar-toggle-hover-zone" onClick={() => setCollapsed(!collapsed)}>
+        <span className="sidebar-toggle-arrow">{collapsed ? "→" : "←"}</span>
+      </div>
+    </aside>
   );
 };
 

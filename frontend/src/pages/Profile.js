@@ -71,7 +71,7 @@ function Profile() {
           email: formData.email,
           nickname: formData.nickname,
           points: formData.points,
-          picture: formData.picture
+          picture: formData.picture,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -94,23 +94,16 @@ function Profile() {
 
       <div className="profile-header">
         <div className="photo-container">
-          {formData.picture ? (
-            <img
-              src={formData.picture}
-              alt="Foto de perfil"
-              className="profile-photo"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = "https://via.placeholder.com/150?text=Avatar";
-              }}
-            />
-          ) : (
-            <img
-              src="https://via.placeholder.com/150?text=Avatar"
-              alt="Sin foto"
-              className="profile-photo"
-            />
-          )}
+          <img
+            src={formData.picture || "/default-avatar.png"}
+            alt="Foto de perfil"
+            className="profile-photo"
+            onError={(e) => {
+              console.warn("⚠️ Error al cargar imagen, usando fallback.");
+              e.target.onerror = null;
+              e.target.src = "/default-avatar.png";
+            }}
+          />
         </div>
 
         <div className="points-display">{formData.points} Pts</div>
@@ -134,12 +127,7 @@ function Profile() {
 
       <div className="input-group">
         <label>Puntos</label>
-        <input
-          type="number"
-          name="points"
-          value={formData.points}
-          onChange={handleInputChange}
-        />
+        <input type="number" name="points" value={formData.points} disabled />
       </div>
 
       <button onClick={handleUpdateProfile}>Guardar Cambios</button>
