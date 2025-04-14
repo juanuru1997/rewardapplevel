@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import "./RewardEditorModal.css";
 
-// 👇 URL del backend directamente (SIN usar .env)
 const API_URL = "http://localhost:5000";
 
 const RewardEditorModal = ({ reward, onClose, onSave, categories = [] }) => {
@@ -19,12 +17,11 @@ const RewardEditorModal = ({ reward, onClose, onSave, categories = [] }) => {
   const [customCategory, setCustomCategory] = useState("");
 
   useEffect(() => {
-    console.log("🧩 RewardEditorModal montado");
+    console.log("🧩 Modal montado. Recompensa:", reward);
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name === "category" && value === "__new__") {
       setFormData((prev) => ({ ...prev, category: "" }));
     } else {
@@ -43,25 +40,44 @@ const RewardEditorModal = ({ reward, onClose, onSave, categories = [] }) => {
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) {
+      console.warn("⚠️ No se seleccionó archivo.");
+      return;
+    }
 
     const form = new FormData();
     form.append("file", file);
+    console.log("📤 Archivo a subir:", file.name);
     setUploading(true);
 
     try {
       const token = localStorage.getItem("token");
+      console.log("🔐 Token localStorage:", token);
       if (!token) throw new Error("Token no disponible");
 
-      const res = await axios.post(`${API_URL}/api/uploads`, form, {
+      console.log("📡 Enviando imagen a:", `${API_URL}/api/uploads`);
+
+      const res = await fetch(`${API_URL}/api/uploads`, {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
         },
+        body: form,
       });
 
-      const data = res.data;
-      if (!data.filename) throw new Error("Respuesta inválida del backend");
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (jsonErr) {
+        console.error("❌ Respuesta no es JSON:", text);
+        throw new Error(`Respuesta del servidor no es JSON:\n${text}`);
+      }
+
+      if (!res.ok) {
+        console.error("❌ Error HTTP:", res.status, data.message);
+        throw new Error(data.message || "Error al subir imagen");
+      }
 
       console.log("✅ Imagen subida correctamente:", data);
 
@@ -70,8 +86,8 @@ const RewardEditorModal = ({ reward, onClose, onSave, categories = [] }) => {
         imageUrl: data.filename,
       }));
     } catch (err) {
-      console.error("❌ Error al subir imagen:", err.message);
-      alert("❌ Error al subir imagen: " + err.message);
+      console.error("🔥 EXCEPCIÓN UPLOAD:", err);
+      alert("❌ Error al subir imagen:\n" + err.message);
     } finally {
       setUploading(false);
     }
@@ -79,10 +95,10 @@ const RewardEditorModal = ({ reward, onClose, onSave, categories = [] }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
+      console.log("📤 Enviando recompensa:", formData);
       await onSave(formData);
-      onClose(); // solo cerrar si `onSave` terminó bien
+      onClose();
     } catch (err) {
       console.error("❌ Error al guardar recompensa:", err);
       alert("Error al guardar recompensa");
@@ -164,7 +180,7 @@ const RewardEditorModal = ({ reward, onClose, onSave, categories = [] }) => {
               alt="Preview"
               className="preview-img"
               onError={(e) => {
-                console.warn("⚠️ Imagen no cargó:", formData.imageUrl);
+                console.warn("⚠️ Imagen no cargó:", e.target.src);
                 e.target.onerror = null;
                 e.target.src = "https://via.placeholder.com/150?text=Sin+imagen";
               }}

@@ -1,14 +1,14 @@
 const express = require("express");
 const multer = require("multer");
-const { GridFsStorage } = require("multer-gridfs-storage");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
+const { GridFSBucket } = require("mongodb");
 require("dotenv").config();
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// 🔐 Middleware de autenticación
+// 🛡️ Autenticación
 const auth = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
@@ -19,6 +19,7 @@ const auth = (req, res, next) => {
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
+    console.log("🔐 Usuario autenticado:", decoded.email);
     next();
   } catch (err) {
     console.error("❌ Token inválido:", err.message);
@@ -26,54 +27,50 @@ const auth = (req, res, next) => {
   }
 };
 
-// ✅ Configuración de GridFS Storage
-const { ObjectId } = mongoose.Types;
-
-const storage = new GridFsStorage({
-  db: mongoose.connection,
-  file: (req, file) => {
-    const id = new ObjectId(); // genera un _id válido manualmente
-
-    return {
-      _id: id,
-      filename: `${Date.now()}-${file.originalname}`,
-      bucketName: "uploads",
-      metadata: { originalname: file.originalname },
-      contentType: file.mimetype, // 👈 importante para servirlo bien
-    };
-  },
-});
-
+// 📁 Multer básico en memoria
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// ✅ Ruta para subir una imagen
-router.post("/", auth, (req, res) => {
-  if (!mongoose.connection.readyState) {
-    return res.status(500).json({ message: "❌ DB no conectada" });
-  }
-
-  upload.single("file")(req, res, (err) => {
-    if (err) {
-      console.error("❌ Multer error:", err.message);
-      return res.status(500).json({ message: "Error al guardar imagen" });
-    }
-
-    console.log("📦 Archivo recibido:", req.file); // 👈 Log útil
-
+// 🖼️ Subida de imagen
+router.post("/", auth, upload.single("file"), async (req, res) => {
+  try {
     if (!req.file) {
+      console.warn("⚠️ No se recibió archivo");
       return res.status(400).json({ message: "No se subió ningún archivo" });
     }
 
-    const publicUrl = `/api/uploads/${req.file.filename}`;
-    console.log("✅ Imagen subida:", publicUrl);
+    const db = mongoose.connection.db;
+    const bucket = new GridFSBucket(db, { bucketName: "uploads" });
 
-    res.status(200).json({
-      message: "✅ Imagen subida exitosamente",
-      filename: req.file.filename,
-      fileId: req.file.id,
-      url: publicUrl,
+    const filename = `${Date.now()}-${req.file.originalname}`;
+    const contentType = req.file.mimetype;
+
+    console.log("📦 Subiendo imagen a GridFS:", filename);
+
+    const uploadStream = bucket.openUploadStream(filename, {
+      contentType,
+      metadata: { originalname: req.file.originalname },
     });
-  });
+
+    uploadStream.end(req.file.buffer);
+
+    uploadStream.on("finish", () => {
+      console.log("✅ Imagen subida con éxito:", filename);
+      res.status(200).json({
+        message: "✅ Imagen subida exitosamente",
+        filename,
+        url: `/api/uploads/${filename}`,
+      });
+    });
+
+    uploadStream.on("error", (err) => {
+      console.error("❌ Error al subir imagen a GridFS:", err);
+      res.status(500).json({ message: "Error al guardar imagen", error: err.message });
+    });
+  } catch (err) {
+    console.error("❌ Error en /api/uploads:", err);
+    res.status(500).json({ message: "Error inesperado", error: err.message });
+  }
 });
 
 module.exports = router;
