@@ -125,10 +125,10 @@ function Profile() {
         <input type="email" name="email" value={formData.email} readOnly />
       </div>
 
-      <div className="input-group">
+      {/* <div className="input-group">
         <label>Puntos</label>
         <input type="number" name="points" value={formData.points} disabled />
-      </div>
+      </div> */}
 
       <button onClick={handleUpdateProfile}>Guardar Cambios</button>
 
