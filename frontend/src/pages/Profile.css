@@ -102,7 +102,6 @@
   box-shadow: 0 0 5px rgba(37, 211, 102, 0.3);
 }
 
-/* Botón */
 button {
   width: 80%;
   padding: 12px;
@@ -112,12 +111,91 @@ button {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  margin: 20px auto;
+  margin: 40px auto 0 auto; /* ⬅️ Aumentamos el margen superior */
   transition: background 0.3s, transform 0.2s ease-in-out;
   text-align: center;
+  display: block;
 }
 
 button:hover {
   background: #128c7e;
   transform: scale(1.05);
+}
+.user-role {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #777;
+  margin-top: 2px;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.user-role {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #777;
+  margin-top: 2px;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.profile-nickname {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #196b4c;
+  margin-bottom: 0.3rem;
+  text-align: center;
+}
+
+.profile-name-role {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.profile-role-badge {
+  background-color: #25d366;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+.role-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.role-option {
+  padding: 10px 18px;
+  border-radius: 24px;
+  background-color: #f3f3f3;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid transparent;
+  color: #333;
+  transition: all 0.2s ease;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.role-option:hover {
+  background-color: #e1f7ec;
+  border-color: #25d366;
+  color: #111;
+}
+
+.role-option.active {
+  background-color: #25d366;
+  color: #fff;
+  border-color: #1ebc5c;
+  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);
 }

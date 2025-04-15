@@ -1,70 +1,257 @@
-.admin-points {
-    max-width: 600px;
-    margin: auto;
-    padding: 2rem;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  }
-  
-  .admin-points h2 {
-    margin-bottom: 2rem;
-    font-size: 1.8rem;
-    color: #333;
-    text-align: center;
-  }
-  
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
-  
-  .form-group label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #333;
-  }
-  
-  .form-group input,
-  .form-group select {
-    width: 100%;
-    padding: 12px 14px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 1rem;
-    transition: border-color 0.2s ease;
-  }
-  
-  .form-group input:focus,
-  .form-group select:focus {
-    border-color: #25d366;
-    outline: none;
-  }
-  
-  .btn-green {
-    width: 100%;
-    padding: 14px;
-    background: linear-gradient(90deg, #25d366, #2eaf7d);
-    color: white;
-    font-weight: bold;
-    font-size: 1rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  
-  .btn-green:hover {
-    background: linear-gradient(90deg, #20c35b, #269a6c);
-  }
-  
-  .message {
-    background: #f1fef4;
-    border-left: 4px solid #25d366;
-    padding: 12px;
-    margin-bottom: 20px;
-    border-radius: 6px;
-    font-weight: 500;
-    color: #222;
-  }
-  
+/* 🎯 Layout general */
+.admin-panel-layout {
+  max-width: 1100px;
+  margin: auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+  font-family: "Inter", sans-serif;
+}
+
+.admin-panel-layout h2 {
+  font-size: 1.8rem;
+  color: #1f1f1f;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* 📑 Sección de columnas */
+.admin-columns {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* 📋 Columna izquierda - lista de usuarios */
+.user-list-column {
+  flex: 1;
+  min-width: 350px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: #25d366;
+  box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.2);
+  outline: none;
+}
+
+.scrollable-user-list {
+  max-height: 420px;
+  overflow-y: auto;
+  border-radius: 12px;
+  background: #f9f9f9;
+  padding: 0.75rem;
+  border: 1px solid #eee;
+}
+
+/* 🧍 Fila de usuario */
+.user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.user-row:hover {
+  background-color: #f1fdf5;
+}
+
+.user-row.selected {
+  background-color: #e6fcef;
+  border-color: #25d366;
+  box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.15);
+}
+
+/* 👤 Info de usuario */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.avatar-large {
+  width: 48px;
+  height: 48px;
+  background-color: #25d366;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.user-text strong {
+  font-size: 1rem;
+  color: #222;
+  display: block;
+}
+
+.user-text p {
+  font-size: 0.875rem;
+  color: #555;
+  margin: 0;
+}
+
+/* ☑️ Checkbox */
+.user-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.user-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #25d366;
+}
+
+/* 📝 Columna derecha - formulario */
+.form-column {
+  flex: 1;
+  min-width: 320px;
+  background: #fdfdfd;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-column h4 {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.form-group input {
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus {
+  border-color: #25d366;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.15);
+}
+
+/* ✅ Botón principal */
+.btn-green {
+  padding: 14px;
+  background: linear-gradient(90deg, #25d366, #2eaf7d);
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-green:hover {
+  background: linear-gradient(90deg, #20c35b, #1a9f6e);
+}
+
+.message {
+  background: #f1fef4;
+  border-left: 4px solid #25d366;
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: #222;
+}
+.select-all-button {
+  background: linear-gradient(90deg, #25d366, #2eaf7d);
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  width: 100%;
+  text-align: center;
+  display: block;
+}
+
+.select-all-button:hover {
+  background: linear-gradient(90deg, #20c35b, #1a9f6e);
+}
+.avatar-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+.user-row .user-text .user-points {
+  font-size: 0.85rem !important;
+  color: #666 !important;
+  font-weight: 500 !important;
+  margin-top: 4px !important;
+  display: block !important;
+}
+.role-filter {
+  margin-bottom: 1rem;
+}
+
+.role-filter select {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: white;
+  color: #333;
+  transition: border-color 0.2s ease;
+}
+
+.role-filter select:focus {
+  border-color: #25d366;
+  box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.2);
+  outline: none;
+}
+
+
+.role-filter select:focus {
+  border-color: #25d366;
+  box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.2);
+}

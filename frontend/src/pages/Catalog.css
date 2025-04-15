@@ -208,4 +208,39 @@
     background-color: white;
     font-weight: 500;
   }
-    
+  .delete-button {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-top: 6px;
+    cursor: pointer;
+  }
+  
+  .delete-button:hover {
+    background: #c0392b;
+  }
+  /* Botón flotante para "Nueva Recompensa" */
+.floating-add-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #25d366; /* Color verde de WhatsApp */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    z-index: 1000;
+  }
+  
+  .floating-add-button:hover {
+    background-color: #128c7e;
+    transform: scale(1.1);
+  }

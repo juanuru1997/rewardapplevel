@@ -117,6 +117,18 @@ router.post("/", auth, auth.adminOnly, async (req, res) => {
     console.error("❌ Error al crear recompensa:", err.message);
     res.status(500).json({ message: "Error al crear la recompensa." });
   }
+  
+});
+// ✅ DELETE /api/rewards/:id - Eliminar recompensa (solo admin)
+router.delete("/:id", auth, auth.adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Reward.findByIdAndDelete(id);
+    res.status(200).json({ message: "Recompensa eliminada" });
+  } catch (err) {
+    console.error("❌ Error al eliminar recompensa:", err);
+    res.status(500).json({ message: "Error al eliminar recompensa" });
+  }
 });
 
 module.exports = router;

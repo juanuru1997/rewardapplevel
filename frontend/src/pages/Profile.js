@@ -12,6 +12,8 @@ function Profile() {
     email: "",
     points: 0,
     picture: "",
+    role: [],
+    isAdmin: false,
   });
 
   const getToken = () => localStorage.getItem("token");
@@ -38,6 +40,8 @@ function Profile() {
         email: userData.email || "",
         points: userData.points || 0,
         picture: userData.picture || "",
+        role: Array.isArray(userData.role) ? userData.role : [],
+        isAdmin: userData.isAdmin || false,
       });
     } catch {
       setError("⚠️ Error al cargar los datos del usuario.");
@@ -50,6 +54,14 @@ function Profile() {
 
   const handleInputChange = ({ target: { name, value } }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRoleToggle = (roleName) => {
+    setFormData((prev) => {
+      const roles = new Set(prev.role);
+      roles.has(roleName) ? roles.delete(roleName) : roles.add(roleName);
+      return { ...prev, role: Array.from(roles) };
+    });
   };
 
   const handleUpdateProfile = async () => {
@@ -72,6 +84,7 @@ function Profile() {
           nickname: formData.nickname,
           points: formData.points,
           picture: formData.picture,
+          role: formData.role,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -90,7 +103,14 @@ function Profile() {
 
   return (
     <div className="profile-container">
-      <h2>{formData.nickname || "Tu Perfil"}</h2>
+      <div className="profile-name-role">
+        <h2 className="profile-nickname">{formData.nickname || "Tu Perfil"}</h2>
+        {formData.role.length > 0 && (
+          <span className="profile-role-badge">
+            {formData.role.join(", ")}
+          </span>
+        )}
+      </div>
 
       <div className="profile-header">
         <div className="photo-container">
@@ -99,7 +119,6 @@ function Profile() {
             alt="Foto de perfil"
             className="profile-photo"
             onError={(e) => {
-              console.warn("⚠️ Error al cargar imagen, usando fallback.");
               e.target.onerror = null;
               e.target.src = "/default-avatar.png";
             }}
@@ -125,10 +144,24 @@ function Profile() {
         <input type="email" name="email" value={formData.email} readOnly />
       </div>
 
-      {/* <div className="input-group">
-        <label>Puntos</label>
-        <input type="number" name="points" value={formData.points} disabled />
-      </div> */}
+      <div className="input-group">
+        <label>Rol</label>
+        {formData.isAdmin ? (
+          <div className="role-selector">
+            {["Development", "Marketing", "Support", "Manager"].map((r) => (
+              <div
+                key={r}
+                className={`role-option ${formData.role.includes(r) ? "active" : ""}`}
+                onClick={() => handleRoleToggle(r)}
+              >
+                {r}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <input type="text" value={formData.role.join(", ")} readOnly />
+        )}
+      </div>
 
       <button onClick={handleUpdateProfile}>Guardar Cambios</button>
 

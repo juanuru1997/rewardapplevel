@@ -46,7 +46,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
 // 🔹 Actualizar perfil
 router.put("/update-profile", authMiddleware, async (req, res) => {
   try {
-    const { email, nickname, points, picture } = req.body;
+    const { email, nickname, points, picture, role } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
 
@@ -54,6 +54,7 @@ router.put("/update-profile", authMiddleware, async (req, res) => {
     if (user.nickname !== nickname) { user.nickname = nickname; hasChanges = true; }
     if (user.points !== points) { user.points = points; hasChanges = true; }
     if (user.picture !== picture) { user.picture = picture; hasChanges = true; }
+    if (user.role !== role) { user.role = role; hasChanges = true; } // 👈 Asegúrate de incluir esto
 
     if (hasChanges) {
       await user.save();
@@ -175,12 +176,13 @@ router.post("/grant-points", authMiddleware, requireAdmin, async (req, res) => {
 // 🔹 Obtener todos los usuarios (solo admin)
 router.get("/all", authMiddleware, requireAdmin, async (req, res) => {
   try {
-    const users = await User.find().select("_id name email");
+    const users = await User.find().select("_id name email picture points role");
     res.status(200).json(users);
   } catch (err) {
     console.error("❌ Error obteniendo usuarios:", err);
     res.status(500).json({ message: "Error interno del servidor" });
   }
 });
+
 
 module.exports = router;

@@ -67,7 +67,29 @@ const Catalog = () => {
   const handlePageChange = (category, index) => {
     setPages((prev) => ({ ...prev, [category]: index }));
   };
-
+  const handleDelete = async (reward) => {
+    const confirm = window.confirm(`¿Eliminar la recompensa "${reward.title}"?`);
+    if (!confirm) return;
+  
+    try {
+      const res = await fetch(`${API_URL}/api/rewards/${reward._id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+  
+      setRewards((prev) => prev.filter((r) => r._id !== reward._id));
+      showNotification("🗑 Recompensa eliminada");
+    } catch (err) {
+      console.error("❌ Error al eliminar recompensa:", err);
+      showNotification("❌ Error al eliminar recompensa");
+    }
+  };
+  
   const handleRedeem = async (reward) => {
     if (!token) return showNotification("⚠️ No estás autenticado");
 
@@ -154,13 +176,21 @@ const Catalog = () => {
   return (
     <div className="catalog-container">
       {notification && (
-        <Notification message={notification} onClose={() => setNotification(null)} />
+        <Notification
+          message={notification}
+          onClose={() => setNotification(null)}
+        />
       )}
 
       {isAdmin && (
-        <div style={{ textAlign: "right", marginBottom: "10px" }}>
-          <button onClick={() => openEditor(null)}>➕ Nueva Recompensa</button>
-        </div>
+        <button
+          onClick={() => openEditor(null)}
+          className="floating-add-button"
+          aria-label="Agregar nueva recompensa"
+          title="Nueva recompensa"
+        >
+          +
+        </button>
       )}
 
       <div className="filters">
@@ -170,7 +200,10 @@ const Catalog = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select value={minPoints} onChange={(e) => setMinPoints(Number(e.target.value))}>
+        <select
+          value={minPoints}
+          onChange={(e) => setMinPoints(Number(e.target.value))}
+        >
           <option value={0}>Todos los puntos</option>
           <option value={100}>+100 pts</option>
           <option value={300}>+300 pts</option>
@@ -185,14 +218,18 @@ const Catalog = () => {
           const page = pages[category] || 0;
           const pageSize = 4;
           const totalPages = Math.ceil(rewardsInCategory.length / pageSize);
-          const visible = rewardsInCategory.slice(page * pageSize, (page + 1) * pageSize);
+          const visible = rewardsInCategory.slice(
+            page * pageSize,
+            (page + 1) * pageSize
+          );
 
           return (
             <div key={category} className="category-section">
               <h2>{category.toUpperCase()}</h2>
               <div className="carousel">
                 {visible.map((reward) => {
-                  const canRedeem = reward.stock > 0 && userPoints >= reward.points;
+                  const canRedeem =
+                    reward.stock > 0 && userPoints >= reward.points;
 
                   return (
                     <div className="reward-card" key={reward._id}>
@@ -227,6 +264,14 @@ const Catalog = () => {
                       ) : (
                         <button className="redeem-button disabled" disabled>
                           Sin puntos suficientes
+                        </button>
+                      )}
+                      {isAdmin && (
+                        <button
+                          className="delete-button"
+                          onClick={() => handleDelete(reward)}
+                        >
+                          🗑 Eliminar
                         </button>
                       )}
 
@@ -270,7 +315,9 @@ const Catalog = () => {
           reward={editingReward}
           onClose={() => setShowEditor(false)}
           onSave={saveReward}
-          categories={[...new Set(rewards.map((r) => r.category).filter(Boolean))]}
+          categories={[
+            ...new Set(rewards.map((r) => r.category).filter(Boolean)),
+          ]}
         />
       )}
     </div>

@@ -7,7 +7,12 @@ const userSchema = new mongoose.Schema({
   email_verified: { type: Boolean, default: false },
   picture: { type: String },
   points: { type: Number, default: 0 },
-  isAdmin: { type: Boolean, default: false }, 
+  isAdmin: { type: Boolean, default: false },
+  role: {
+    type: [String],
+    enum: ["Development", "Marketing", "Support", "Manager"],
+    default: [],
+  },
   updatedAt: { type: Date, default: Date.now },
 });
 
